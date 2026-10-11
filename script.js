@@ -1,166 +1,150 @@
-/* ==========================================
-   NAVIGATION & SCROLL
-   ========================================== */
+const navbar = document.getElementById("navbar");
+const navMenu = document.getElementById("navMenu");
+const navToggle = document.getElementById("navToggle");
+const navLinks = document.querySelectorAll(".nav-link");
 
-const navbar = document.getElementById('navbar');
-const navMenu = document.getElementById('navMenu');
-const navToggle = document.getElementById('navToggle');
-const navLinks = document.querySelectorAll('.nav-link');
 
-// Mobile menu toggle
-navToggle.addEventListener('click', () => {
-    navToggle.classList.toggle('active');
-    navMenu.classList.toggle('active');
-});
-
-// Close mobile menu on link click
-navLinks.forEach(link => {
-    link.addEventListener('click', () => {
-        navToggle.classList.remove('active');
-        navMenu.classList.remove('active');
+// mobile menu stuff
+if (navToggle && navMenu) {
+    navToggle.addEventListener("click", () => {
+        navToggle.classList.toggle("active");
+        navMenu.classList.toggle("active");
     });
-});
 
-// Navbar scroll effect
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
+    navLinks.forEach(link => {
+        link.addEventListener("click", () => {
+            navToggle.classList.remove("active");
+            navMenu.classList.remove("active");
+        });
+    });
+}
+
+
+// navbar changes when scrolling
+window.addEventListener("scroll", () => {
+    if (navbar) {
+        navbar.classList.toggle("scrolled", window.scrollY > 50);
     }
 });
 
-// Smooth scroll for CTA button
-document.querySelector('.btn-cta').addEventListener('click', (e) => {
-    e.preventDefault();
-    document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-});
 
-/* ==========================================
-   INTERSECTION OBSERVER FOR ANIMATIONS
-   ========================================== */
+// lets connect button
+const connectBtn = document.querySelector(".btn-cta");
 
-const observerOptions = {
-    threshold: 0.1,
-    rootMargin: '0px 0px -100px 0px'
-};
+if (connectBtn) {
+    connectBtn.addEventListener("click", () => {
+        document.getElementById("contact")?.scrollIntoView({
+            behavior: "smooth"
+        });
+    });
+}
 
-const observer = new IntersectionObserver((entries) => {
+
+// animations when stuff appears on screen
+const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
+            entry.target.classList.add("visible");
             observer.unobserve(entry.target);
         }
     });
-}, observerOptions);
-
-// Observe all fade-in elements
-document.querySelectorAll('.about-card, .project-card, .explore-card, .skill-category, .timeline-content').forEach(el => {
-    el.classList.add('fade-in');
-    observer.observe(el);
+}, {
+    threshold: 0.1,
+    rootMargin: "0px 0px -50px 0px"
 });
 
-/* ==========================================
-   CONTACT FORM
-   ========================================== */
-
-const contactForm = document.getElementById('contactForm');
-const formSuccess = document.getElementById('formSuccess');
-
-contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    // Get form values
-    const name = document.getElementById('name').value;
-    const email = document.getElementById('email').value;
-    const message = document.getElementById('message').value;
-
-    // Validate
-    if (!name.trim() || !email.trim() || !message.trim()) {
-        alert('Please fill in all fields');
-        return;
-    }
-
-    // Show success state
-    contactForm.style.opacity = '0';
-    contactForm.style.pointerEvents = 'none';
-    formSuccess.classList.add('active');
-
-    // Reset form
-    contactForm.reset();
-
-    // Reset after 4 seconds
-    setTimeout(() => {
-        formSuccess.classList.remove('active');
-        contactForm.style.opacity = '1';
-        contactForm.style.pointerEvents = 'auto';
-    }, 4000);
-
-    // Log the message (in a real site, this would send to a backend)
-    console.log('Contact form submitted:', { name, email, message });
+document.querySelectorAll(
+    ".about-card, .project-card, .explore-card, .skill-category, .timeline-content"
+).forEach(card => {
+    card.classList.add("fade-in");
+    observer.observe(card);
 });
 
-/* ==========================================
-   ACTIVE NAV LINK ON SCROLL
-   ========================================== */
 
+// contact form
+const contactForm = document.getElementById("contactForm");
+const formSuccess = document.getElementById("formSuccess");
+
+if (contactForm && formSuccess) {
+    contactForm.addEventListener("submit", e => {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const message = document.getElementById("message").value.trim();
+
+        if (!name || !email || !message) {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        console.log("New message:", {
+            name: name,
+            email: email,
+            message: message
+        });
+
+        contactForm.style.display = "none";
+        formSuccess.classList.add("active");
+
+        contactForm.reset();
+
+        setTimeout(() => {
+            formSuccess.classList.remove("active");
+            contactForm.style.display = "flex";
+        }, 4000);
+    });
+}
+
+
+// highlight the nav link for the current section
 function updateActiveLink() {
-    const sections = document.querySelectorAll('section[id]');
-    let current = '';
+    let current = "";
 
-    sections.forEach(section => {
-        const sectionTop = section.offsetTop;
-        if (window.scrollY >= sectionTop - 200) {
-            current = section.getAttribute('id');
+    document.querySelectorAll("section[id]").forEach(section => {
+        if (window.scrollY >= section.offsetTop - 200) {
+            current = section.id;
         }
     });
 
     navLinks.forEach(link => {
-        link.classList.remove('active');
-        if (link.getAttribute('href').slice(1) === current) {
-            link.classList.add('active');
-        }
+        link.classList.toggle(
+            "active",
+            link.getAttribute("href") === "#" + current
+        );
     });
 }
 
-window.addEventListener('scroll', updateActiveLink);
+window.addEventListener("scroll", updateActiveLink);
+updateActiveLink();
 
-/* ==========================================
-   MAGNETIC BUTTON EFFECT (HOVER)
-   ========================================== */
 
-const magneticElements = document.querySelectorAll('.btn, .social-link');
+// little hover effect for buttons
+document.querySelectorAll(".btn, .social-link").forEach(el => {
+    el.addEventListener("mousemove", e => {
+        if (window.innerWidth <= 768) return;
 
-magneticElements.forEach(el => {
-    el.addEventListener('mousemove', (e) => {
-        if (window.innerWidth > 768) {
-            const rect = el.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const distance = 50;
+        const rect = el.getBoundingClientRect();
+        const x = e.clientX - (rect.left + rect.width / 2);
+        const y = e.clientY - (rect.top + rect.height / 2);
 
-            const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX);
-            const x = Math.cos(angle) * distance;
-            const y = Math.sin(angle) * distance;
-
-            el.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
-        }
+        el.style.transform = `translate(${x * 0.1}px, ${y * 0.1}px)`;
     });
 
-    el.addEventListener('mouseleave', () => {
-        el.style.transform = 'translate(0, 0)';
+    el.addEventListener("mouseleave", () => {
+        el.style.transform = "";
     });
 });
 
-/* ==========================================
-   SMOOTH NUMBER COUNTER (For stats if added)
-   ========================================== */
 
+// number counter if i add stats later
 function animateCounter(element, target, duration = 2000) {
     let current = 0;
-    const increment = target / (duration / 16);
+    const step = target / (duration / 16);
+
     const timer = setInterval(() => {
-        current += increment;
+        current += step;
+
         if (current >= target) {
             element.textContent = target;
             clearInterval(timer);
@@ -170,132 +154,88 @@ function animateCounter(element, target, duration = 2000) {
     }, 16);
 }
 
-/* ==========================================
-   PARALLAX EFFECT (SUBTLE)
-   ========================================== */
 
-window.addEventListener('scroll', () => {
-    const scrolled = window.scrollY;
-    const hero = document.querySelector('.hero-visual');
+// small parallax effect on the hero
+window.addEventListener("scroll", () => {
+    const hero = document.querySelector(".hero-visual");
 
-    if (hero && scrolled < window.innerHeight) {
-        hero.style.transform = `translateY(${scrolled * 0.3}px)`;
+    if (hero && window.scrollY < window.innerHeight) {
+        hero.style.transform = `translateY(${window.scrollY * 0.15}px)`;
     }
 });
 
-/* ==========================================
-   PAGE LOAD ANIMATION
-   ========================================== */
 
-window.addEventListener('load', () => {
-    document.body.style.opacity = '1';
+// page load
+window.addEventListener("load", () => {
+    document.body.style.opacity = "1";
 
-    // Animate hero elements
-    const heroElements = document.querySelectorAll('.title-line');
-    heroElements.forEach((el, i) => {
-        el.style.animationDelay = `${i * 0.1}s`;
+    document.querySelectorAll(".title-line").forEach((line, i) => {
+        line.style.animationDelay = `${i * 0.1}s`;
     });
 });
 
-// Ensure fade-in starts
-document.body.style.opacity = '0';
-document.body.style.transition = 'opacity 0.5s ease';
+document.body.style.opacity = "0";
+document.body.style.transition = "opacity 0.5s ease";
 
-/* ==========================================
-   SCROLL PROGRESS INDICATOR (Optional)
-   ========================================== */
 
-function updateScrollProgress() {
-    const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrolled = (window.scrollY / totalHeight) * 100;
+// lazy loading images
+if ("IntersectionObserver" in window) {
+    const imageObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const img = entry.target;
 
-    // You can add a progress bar by uncommenting below
-    // document.querySelector('.scroll-progress')?.style.setProperty('--progress', `${scrolled}%`);
+                img.src = img.dataset.src;
+                img.classList.add("loaded");
+
+                imageObserver.unobserve(img);
+            }
+        });
+    });
+
+    document.querySelectorAll("img[data-src]").forEach(img => {
+        imageObserver.observe(img);
+    });
 }
 
-window.addEventListener('scroll', updateScrollProgress);
 
-/* ==========================================
-   PRELOAD FONTS
-   ========================================== */
+// respect reduced motion settings
+const reduceMotion = window.matchMedia(
+    "(prefers-reduced-motion: reduce)"
+).matches;
 
+if (reduceMotion) {
+    document.documentElement.style.scrollBehavior = "auto";
+
+    document.querySelectorAll(".fade-in").forEach(el => {
+        el.style.transition = "none";
+        el.style.transform = "none";
+        el.style.opacity = "1";
+    });
+}
+
+
+// keyboard shortcuts
+document.addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+
+        document.getElementById("contact")?.scrollIntoView({
+            behavior: "smooth"
+        });
+
+        setTimeout(() => {
+            document.getElementById("name")?.focus();
+        }, 500);
+    }
+});
+
+
+// load the font
 if (document.fonts) {
     document.fonts.load('400 1em "Inter"');
     document.fonts.load('600 1em "Inter"');
     document.fonts.load('700 1em "Inter"');
 }
 
-/* ==========================================
-   PERFORMANCE: LAZY LOAD IMAGES
-   ========================================== */
-
-if ('IntersectionObserver' in window) {
-    const imageObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const img = entry.target;
-                img.src = img.dataset.src;
-                img.classList.add('loaded');
-                imageObserver.unobserve(img);
-            }
-        });
-    });
-
-    document.querySelectorAll('img[data-src]').forEach(img => {
-        imageObserver.observe(img);
-    });
-}
-
-/* ==========================================
-   ACCESSIBILITY: REDUCED MOTION
-   ========================================== */
-
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-if (prefersReducedMotion) {
-    document.documentElement.style.scrollBehavior = 'auto';
-    document.querySelectorAll('[class*="animate"], [class*="transition"]').forEach(el => {
-        el.style.animation = 'none';
-        el.style.transition = 'none';
-    });
-}
-
-/* ==========================================
-   KEYBOARD NAVIGATION
-   ========================================== */
-
-document.addEventListener('keydown', (e) => {
-    // Skip to main content
-    if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
-        e.preventDefault();
-        document.getElementById('home').focus();
-    }
-});
-
-/* ==========================================
-   THEME DETECTION (For future dark/light toggle)
-   ========================================== */
-
-function detectTheme() {
-    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    // The site is already dark, so no changes needed
-    // But this hook is available for future light mode implementation
-    return isDark ? 'dark' : 'light';
-}
-
-/* ==========================================
-   SEND KEYBOARD SHORTCUTS
-   ========================================== */
-
-// Ctrl+K or Cmd+K to focus contact form
-document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => {
-            document.getElementById('name').focus();
-        }, 500);
-    }
-});
-
-console.log('🚀 Portfolio loaded. Press Cmd/Ctrl+K to jump to contact.');
+console.log("Portfolio loaded :)");
